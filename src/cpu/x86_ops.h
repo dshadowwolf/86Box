@@ -106,6 +106,10 @@ extern const OpFn dynarec_ops_pentium2d_0f[1024];
 extern const OpFn dynarec_ops_pentium3_0f[1024];
 extern const OpFn dynarec_ops_pentium3_REPE_0f[1024];
 
+extern const OpFn dynarec_ops_pentium4_0f[1024];
+extern const OpFn dynarec_ops_pentium4_REPE_0f[1024];
+extern const OpFn dynarec_ops_pentium4_REPNE_0f[1024];
+
 extern const OpFn dynarec_ops_nehemiah_0f[1024];
 extern const OpFn dynarec_ops_nehemiah_REPE_0f[1024];
 
@@ -254,6 +258,10 @@ extern const OpFn ops_pentium2_0f[1024];
 extern const OpFn ops_pentium2d_0f[1024];
 extern const OpFn ops_pentium3_0f[1024];
 extern const OpFn ops_pentium3_REPE_0f[1024];
+
+extern const OpFn ops_pentium4_0f[1024];
+extern const OpFn ops_pentium4_REPE_0f[1024];
+extern const OpFn ops_pentium4_REPNE_0f[1024];
 
 extern const OpFn ops_nehemiah_0f[1024];
 extern const OpFn ops_nehemiah_REPE_0f[1024];

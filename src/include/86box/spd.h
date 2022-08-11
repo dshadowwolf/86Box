@@ -25,9 +25,11 @@
 #define SPD_TYPE_FPM            0x01
 #define SPD_TYPE_EDO            0x02
 #define SPD_TYPE_SDRAM          0x04
+#define SPD_TYPE_DDR            0x07
 
 #define SPD_MIN_SIZE_EDO        8
 #define SPD_MIN_SIZE_SDRAM      8
+#define SPD_MIN_SIZE_DDR        8
 
 #define SPD_SIGNAL_LVTTL        0x01
 
@@ -131,6 +133,58 @@ typedef struct spd_sdram_t {
     uint8_t checksum2;
 } spd_sdram_t;
 
+typedef struct spd_ddr_t{
+    uint8_t bytes_used;
+    uint8_t spd_size;
+    uint8_t mem_type;
+    uint8_t row_bits;
+    uint8_t col_bits;
+    uint8_t rows;
+    uint8_t data_width_lsb;
+    uint8_t data_width_msb;
+    uint8_t signal_level;
+    uint8_t tclk;
+    uint8_t tac;
+    uint8_t config;
+    uint8_t refresh_rate;
+    uint8_t sdram_width;
+    uint8_t ecc_width;
+    uint8_t tccd;
+    uint8_t burst;
+    uint8_t banks;
+    uint8_t cas;
+    uint8_t cslat;
+    uint8_t we;
+    uint8_t mod_attr;
+    uint8_t dev_attr;
+    uint8_t tclk2;
+    uint8_t tac2;
+    uint8_t tclk3;
+    uint8_t tac3;
+    uint8_t trp;
+    uint8_t trrd;
+    uint8_t trcd;
+    uint8_t tras;
+    uint8_t bank_density;
+    uint8_t ca_setup;
+    uint8_t ca_hold;
+    uint8_t data_setup;
+    uint8_t data_hold;
+    uint8_t reserved[26];
+    uint8_t spd_rev;
+    uint8_t checksum;
+    uint8_t mfg_jedec[8];
+    uint8_t mfg_loc;
+    char    part_no[18];
+    uint8_t rev_code[2];
+    uint8_t mfg_year;
+    uint8_t mfg_week;
+    uint8_t serial[4];
+    uint8_t mfg_specific[27];
+    uint8_t other_data[127];
+    uint8_t checksum2;
+} spd_ddr_t;
+
 typedef struct spd_t {
     uint8_t  slot;
     uint16_t size;
@@ -141,6 +195,7 @@ typedef struct spd_t {
         uint8_t     data[SPD_DATA_SIZE];
         spd_edo_t   edo_data;
         spd_sdram_t sdram_data;
+        spd_ddr_t   ddr_data;
     };
     void *eeprom;
 } spd_t;

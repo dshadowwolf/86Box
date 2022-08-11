@@ -40,6 +40,9 @@
 #define AGP_BRIDGE_INTEL_440BX 0x80867191
 #define AGP_BRIDGE_INTEL_440GX 0x808671a1
 #define AGP_BRIDGE_INTEL_815EP 0x80861131
+#define AGP_BRIDGE_INTEL_845   0x80861a31
+#define AGP_BRIDGE_INTEL_845E  0x80861a31
+#define AGP_BRIDGE_INTEL_845PE 0x80861a31
 #define AGP_BRIDGE_VIA_597     0x11068597
 #define AGP_BRIDGE_VIA_598     0x11068598
 #define AGP_BRIDGE_VIA_691     0x11068691
@@ -134,7 +137,7 @@ pci_bridge_write(int func, int addr, uint8_t val, void *priv)
             if (AGP_BRIDGE_INTEL(dev->local)) {
                 if (dev->local == AGP_BRIDGE_INTEL_440BX)
                     val &= 0x1f;
-                else if (dev->local == AGP_BRIDGE_INTEL_815EP)
+                else if ((dev->local == AGP_BRIDGE_INTEL_815EP) || (dev->local == AGP_BRIDGE_INTEL_845))
                     val &= 0x17;
                 else if (dev->local == PCI_BRIDGE_INTEL_ICH2)
                     val &= 0x47;
@@ -162,7 +165,7 @@ pci_bridge_write(int func, int addr, uint8_t val, void *priv)
             break;
 
         case 0x07:
-            if ((dev->local == AGP_BRIDGE_INTEL_440LX) || (dev->local == AGP_BRIDGE_INTEL_815EP) || (dev->local == AGP_BRIDGE_AMD_751))
+            if ((dev->local == AGP_BRIDGE_INTEL_440LX) || (dev->local == AGP_BRIDGE_INTEL_815EP) || (dev->local == AGP_BRIDGE_INTEL_845) || (dev->local == AGP_BRIDGE_AMD_751))
                 dev->regs[addr] &= ~(val & 0x40);
             else if (dev->local == PCI_BRIDGE_INTEL_ICH2)
                 dev->regs[addr] &= ~(val & 0xf9);
@@ -202,6 +205,8 @@ pci_bridge_write(int func, int addr, uint8_t val, void *priv)
                     dev->regs[addr] &= ~(val & 0xf0);
                 else if (dev->local == AGP_BRIDGE_INTEL_815EP)
                     dev->regs[addr] &= ~(val & 0xb2);
+                else if (dev->local == AGP_BRIDGE_INTEL_845)
+                    dev->regs[addr] &= ~(val & 0xb0);
             } else if (AGP_BRIDGE_ALI(dev->local))
                 dev->regs[addr] &= ~(val & 0xf0);
             else if (dev->local == AGP_BRIDGE_AMD_751)
@@ -209,7 +214,7 @@ pci_bridge_write(int func, int addr, uint8_t val, void *priv)
             return;
 
         case 0x1b:
-            if ((dev->local == AGP_BRIDGE_INTEL_815EP) || (dev->local == PCI_BRIDGE_INTEL_ICH2))
+            if ((dev->local == AGP_BRIDGE_INTEL_815EP) || (dev->local == AGP_BRIDGE_INTEL_845) || (dev->local == PCI_BRIDGE_INTEL_ICH2))
                 val &= 0xf8;
             break;
 
@@ -264,6 +269,8 @@ pci_bridge_write(int func, int addr, uint8_t val, void *priv)
                 val &= 0x32;
             else if ((dev->local == AGP_BRIDGE_INTEL_815EP) || (dev->local == PCI_BRIDGE_INTEL_ICH2))
                 val &= 0x01;
+            else if (dev->local == AGP_BRIDGE_INTEL_845)
+                val &= 1;
             break;
 
         case 0x41:
@@ -498,6 +505,11 @@ pci_bridge_reset(void *priv)
             dev->regs[0x08] = 0x02;
             break;
 
+        case AGP_BRIDGE_INTEL_845:
+            dev->regs[0x06] = 0xa0;
+            dev->regs[0x08] = 0x03;
+            break;
+
         case AGP_BRIDGE_VIA_597:
         case AGP_BRIDGE_VIA_598:
         case AGP_BRIDGE_VIA_691:
@@ -579,7 +591,7 @@ pci_bridge_init(const device_t *info)
     pci_add_bridge(AGP_BRIDGE(dev->local), pci_bridge_read, pci_bridge_write, dev, &dev->slot);
 
     /* Let the machine configuration slot handle the absurd interrupt tables */
-    if ((info->local != PCI_BRIDGE_INTEL_ICH2) && (info->local != AGP_BRIDGE_INTEL_815EP)) {
+    if ((info->local != PCI_BRIDGE_INTEL_ICH2) && (info->local != AGP_BRIDGE_INTEL_815EP) && (info->local != AGP_BRIDGE_INTEL_845)) {
         interrupt_count = sizeof(interrupts);
         interrupt_mask  = interrupt_count - 1;
         if (dev->slot < 32) {
@@ -732,6 +744,48 @@ const device_t intel_815ep_agp_device = {
     .internal_name = "intel_815ep_agp",
     .flags         = DEVICE_PCI,
     .local         = AGP_BRIDGE_INTEL_815EP,
+    .init          = pci_bridge_init,
+    .close         = NULL,
+    .reset         = pci_bridge_reset,
+    { .available = NULL },
+    .speed_changed = NULL,
+    .force_redraw  = NULL,
+    .config        = NULL
+};
+
+const device_t intel_845_agp_device = {
+    .name          = "Intel 845 MCH AGP Bridge",
+    .internal_name = "intel_845_agp",
+    .flags         = DEVICE_PCI,
+    .local         = AGP_BRIDGE_INTEL_845,
+    .init          = pci_bridge_init,
+    .close         = NULL,
+    .reset         = pci_bridge_reset,
+    { .available = NULL },
+    .speed_changed = NULL,
+    .force_redraw  = NULL,
+    .config        = NULL
+};
+
+const device_t intel_845e_agp_device = {
+    .name          = "Intel 845E MCH AGP Bridge",
+    .internal_name = "intel_845e_agp",
+    .flags         = DEVICE_PCI,
+    .local         = AGP_BRIDGE_INTEL_845E,
+    .init          = pci_bridge_init,
+    .close         = NULL,
+    .reset         = pci_bridge_reset,
+    { .available = NULL },
+    .speed_changed = NULL,
+    .force_redraw  = NULL,
+    .config        = NULL
+};
+
+const device_t intel_845pe_agp_device = {
+    .name          = "Intel 845PE MCH AGP Bridge",
+    .internal_name = "intel_845pe_agp",
+    .flags         = DEVICE_PCI,
+    .local         = AGP_BRIDGE_INTEL_845PE,
     .init          = pci_bridge_init,
     .close         = NULL,
     .reset         = pci_bridge_reset,

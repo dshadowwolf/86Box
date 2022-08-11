@@ -256,7 +256,7 @@ fx_save_stor_common(uint32_t fetchdat, int bits)
         x86illegal();
         return cpu_state.abrt;
     }
-    if (((fxinst > 3) && (fxinst != 7)) && (cpu_features & CPU_FEATURE_SSE)) {
+    if (((fxinst > 3) && (fxinst != 7)) && (cpu_features & CPU_FEATURE_SSE) && !(cpu_features & CPU_FEATURE_SSE2)) {
         x86illegal();
         return cpu_state.abrt;
     } else if (fxinst == 4) {
@@ -326,7 +326,10 @@ fx_save_stor_common(uint32_t fetchdat, int bits)
         x87_settag(rec_ftw);
 
         if (cpu_features & CPU_FEATURE_SSE) {
-            mxcsr = readmeml(easeg, cpu_state.eaaddr + 24) & ~0xffbf;
+            if (!(cpu_features & CPU_FEATURE_SSE2))
+                mxcsr = readmeml(easeg, cpu_state.eaaddr + 24) & ~0xffbf;
+            else
+                mxcsr = readmeml(easeg, cpu_state.eaaddr + 24) & ~0xffff;
             XMM[0].q[0] = readmemq(easeg, cpu_state.eaaddr + 0xa0);
             XMM[0].q[1] = readmemq(easeg, cpu_state.eaaddr + 0xa8);
             XMM[1].q[0] = readmemq(easeg, cpu_state.eaaddr + 0xb0);
@@ -410,7 +413,10 @@ fx_save_stor_common(uint32_t fetchdat, int bits)
 
         if (cpu_features & CPU_FEATURE_SSE) {
             writememl(easeg, cpu_state.eaaddr + 24, mxcsr);
-            writememl(easeg, cpu_state.eaaddr + 28, 0xffbf);
+            if (!(cpu_features & CPU_FEATURE_SSE2))
+                writememl(easeg, cpu_state.eaaddr + 28, 0xffbf);
+            else
+                writememl(easeg, cpu_state.eaaddr + 28, 0xffff);
             writememq(easeg, cpu_state.eaaddr + 0xa0, XMM[0].q[0]);
             writememq(easeg, cpu_state.eaaddr + 0xa8, XMM[0].q[1]);
             writememq(easeg, cpu_state.eaaddr + 0xb0, XMM[1].q[0]);
@@ -439,7 +445,9 @@ fx_save_stor_common(uint32_t fetchdat, int bits)
         }
         uint32_t src;
 
-        uint32_t mxcsr_mask = 0xffbf;
+        uint32_t mxcsr_mask = 0xffff;
+        if (!(cpu_features & CPU_FEATURE_SSE2))
+            mxcsr_mask = 0xffbf;
 
         SEG_CHECK_READ(cpu_state.ea_seg);
         src = readmeml(easeg, cpu_state.eaaddr);

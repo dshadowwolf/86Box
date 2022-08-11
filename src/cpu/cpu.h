@@ -85,7 +85,9 @@ enum {
     CPU_PENTIUM2,
     CPU_PENTIUM2D,
     CPU_PENTIUM3,
-    CPU_ATHLON
+    CPU_ATHLON,
+    CPU_PENTIUM4,
+    CPU_PENTIUM4N
 };
 
 enum {
@@ -115,7 +117,9 @@ enum {
     CPU_PKG_SLOTA         = (1 << 23),
     CPU_PKG_SOCKET370     = (1 << 24),
     CPU_PKG_SOCKETA       = (1 << 25),
-    CPU_PKG_EBGA368       = (1 << 26)
+    CPU_PKG_EBGA368       = (1 << 26),
+    CPU_PKG_SOCKET423     = (1 << 27),
+    CPU_PKG_SOCKET478     = (1 << 28)
 };
 
 #define MANU_INTEL           0
@@ -602,6 +606,7 @@ extern int is_k6;
 extern int is_p6;
 extern int is_athlon;
 extern int is_pentium3;
+extern int is_pentium4;
 extern int is_cxsmm;
 extern int hascache;
 extern int isibm486;
@@ -619,6 +624,8 @@ extern int hasfpu;
 #define CPU_FEATURE_3DNOWE  (1 << 8)
 #define CPU_FEATURE_SSE     (1 << 9)
 #define CPU_FEATURE_PGE     (1 << 10)
+#define CPU_FEATURE_SSE2    (1 << 11)
+#define CPU_FEATURE_CLFLUSH (1 << 12)
 
 extern uint32_t cpu_features;
 
