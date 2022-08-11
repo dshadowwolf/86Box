@@ -84,8 +84,8 @@ enum {
     CPU_PENTIUMPRO, /* 686 class CPUs */
     CPU_PENTIUM2,
     CPU_PENTIUM2D,
-    CPU_ATHLON,
-    CPU_PENTIUM3
+    CPU_PENTIUM3,
+    CPU_ATHLON
 };
 
 enum {
