@@ -96,7 +96,6 @@ fdc_log(const char *fmt, ...)
 #    define fdc_log(fmt, ...)
 #endif
 
-#if 0
 const device_t fdc_none_device = {
     .name          = "None",
     .internal_name = "none",
@@ -110,7 +109,6 @@ const device_t fdc_none_device = {
     .force_redraw  = NULL,
     .config        = NULL
 };
-#endif
 
 const device_t fdc_internal_device = {
     .name          = "Internal",
@@ -132,9 +130,7 @@ typedef const struct {
 
 static fdc_cards_t fdc_cards[] = {
     // clang-format off
-#if 0
     { &fdc_none_device     },
-#endif
     { &fdc_internal_device },
     { &fdc_b215_device     },
     { &fdc_pii151b_device  },
