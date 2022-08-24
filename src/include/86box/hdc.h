@@ -33,6 +33,7 @@
 #define HDC_INTERNAL 1
 
 extern int hdc_current;
+extern int hdc_type;
 
 extern const device_t st506_xt_xebec_device;              /* st506_xt_xebec */
 extern const device_t st506_xt_wdxt_gen_device;           /* st506_xt_wdxt_gen */
