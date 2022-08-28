@@ -33,8 +33,10 @@
  *
  *
  * Authors: Fred N. van Kempen, <decwiz@yahoo.com>
+ *          Jasmine Iwanek <jriwanek@gmail.com>
  *
- *          Copyright 2018 Fred N. van Kempen.
+ *          Copyright 2018      Fred N. van Kempen.
+ *          Copyright 2022-2023 Jasmine Iwanek.
  *
  *          Redistribution and  use  in source  and binary forms, with
  *          or  without modification, are permitted  provided that the
@@ -97,16 +99,19 @@
 #define ISAMEM_RAMPAGEXT_CARD  11
 #define ISAMEM_ABOVEBOARD_CARD 12
 #define ISAMEM_BRAT_CARD       13
+#define ISAMEM_LOTECH_CARD     14
 
-#define ISAMEM_DEBUG           0
+#define ISAMEM_DEBUG           0 // currently broken
 
 #define RAM_TOPMEM             (640 << 10)  /* end of low memory */
 #define RAM_UMAMEM             (384 << 10)  /* upper memory block */
 #define RAM_EXTMEM             (1024 << 10) /* start of high memory */
 
-#define EMS_MAXSIZE            (2048 << 10) /* max EMS memory size */
-#define EMS_PGSIZE             (16 << 10)   /* one page is this big */
-#define EMS_MAXPAGE            4            /* number of viewport pages */
+#define EMS_30_MAXSIZE         (4096 << 10)  /* max EMS memory size */
+#define EMS_32_MAXSIZE         (8192 << 10)  /* max EMS memory size */
+#define EMS_40_MAXSIZE         (32768 << 10) /* max EMS memory size */
+#define EMS_PGSIZE             (16 << 10)    /* one page is this big */
+#define EMS_MAXPAGE            4             /* number of viewport pages */
 
 #define EXTRAM_CONVENTIONAL    0
 #define EXTRAM_HIGH            1
@@ -131,11 +136,15 @@ typedef struct memdev_t {
     uint8_t     board    : 6; /* board type */
     uint8_t     reserved : 2;
 
-    uint8_t flags;
-#define FLAG_CONFIG 0x01 /* card is configured */
-#define FLAG_WIDE   0x10 /* card uses 16b mode */
-#define FLAG_FAST   0x20 /* fast (<= 120ns) chips */
-#define FLAG_EMS    0x40 /* card has EMS mode enabled */
+    uint8_t	flags;
+#define FLAG_CONFIG	0x01 /* card is configured */
+#define FLAG_EMS30	0x02 /* EMS 3.0 card */
+#define FLAG_EMS32	0x04 /* EMS 3.2 card */
+#define FLAG_EEMS	0x04 /* EEMS  card */
+#define FLAG_EMS40	0x08 /* EMS 4.0 card */
+#define FLAG_WIDE	0x10 /* card uses 16b mode */
+#define FLAG_FAST	0x20 /* fast (<= 120ns) chips */
+#define FLAG_EMS	0x40 /* card has EMS mode enabled */
 
     uint16_t total_size; /* configured size in KB */
     uint32_t base_addr;  /* configured I/O address */
@@ -156,6 +165,7 @@ typedef struct memdev_t {
     emsreg_t ems[EMS_MAXPAGE]; /* EMS controller registers */
 } memdev_t;
 
+#define ENABLE_ISAMEM_LOG 1
 #ifdef ENABLE_ISAMEM_LOG
 int isamem_do_log = ENABLE_ISAMEM_LOG;
 
@@ -296,6 +306,8 @@ ems_read(uint16_t port, void *priv)
     vpage = (port / EMS_PGSIZE);
     port &= (EMS_PGSIZE - 1);
 
+    isamem_log("ISAMEM: read(%04x) = %02x) page=%d\n", port, ret, vpage);
+
     switch (port - dev->base_addr) {
         case 0x0000: /* page number register */
             ret = dev->ems[vpage].page;
@@ -304,15 +316,20 @@ ems_read(uint16_t port, void *priv)
             break;
 
         case 0x0001: /* W/O */
+            ret = 0x00;
+            break;
+
+        case 0x0002: /* W/O */
+            ret = 0x00;
+            break;
+
+        case 0x0003: /* W/O */
+            ret = 0x00;
             break;
 
         default:
             break;
     }
-
-#if ISAMEM_DEBUG
-    isamem_log("ISAMEM: read(%04x) = %02x)\n", port, ret);
-#endif
 
     return ret;
 }
@@ -328,12 +345,11 @@ ems_write(uint16_t port, uint8_t val, void *priv)
     vpage = (port / EMS_PGSIZE);
     port &= (EMS_PGSIZE - 1);
 
-#if ISAMEM_DEBUG
     isamem_log("ISAMEM: write(%04x, %02x) page=%d\n", port, val, vpage);
-#endif
 
     switch (port - dev->base_addr) {
         case 0x0000: /* page mapping registers */
+            isamem_log("EMS: write(%02x) to register 0! (%02x)\n", val);
             /* Set the page number. */
             dev->ems[vpage].enabled = (val & 0x80);
             dev->ems[vpage].page    = (val & 0x7f);
@@ -381,12 +397,20 @@ ems_write(uint16_t port, uint8_t val, void *priv)
                       * 80 c0 e0  DC000
                       * 80 c0 e0  E0000
                       */
-            isamem_log("EMS: write(%02x) to register 1 !\n");
+            isamem_log("EMS: write(%02x) to register 1! (%02x) \n", val);
             dev->ems[vpage].frame = val;
             if (val)
                 dev->flags |= FLAG_CONFIG;
             break;
-        
+
+        case 0x0002:
+            isamem_log("EMS: write(%02x) to register 2! (%02x) \n", val);
+            break;
+
+        case 0x0003:
+            isamem_log("EMS: write(%02x) to register 3! (%02x) \n", val);
+            break;
+
         default:
             break;
     }
@@ -464,6 +488,12 @@ isamem_init(const device_t *info)
             if (!!device_get_config_int("speed"))
                 dev->flags |= FLAG_FAST;
             break;
+
+	case ISAMEM_LOTECH_CARD:
+		dev->base_addr = device_get_config_hex16("base");
+		dev->total_size = device_get_config_int("size");
+		dev->frame_addr = device_get_config_hex20("frame");
+		dev->flags |= FLAG_EMS;
 
         default:
             break;
@@ -614,10 +644,10 @@ isamem_init(const device_t *info)
 
     /* If EMS is enabled, use the remainder for EMS. */
     if (dev->flags & FLAG_EMS) {
-        /* EMS 3.2 cannot have more than 2048KB per board. */
+        /* EMS 3.2 cannot have more than 4096KB per board. */
         t = k;
-        if (t > EMS_MAXSIZE)
-            t = EMS_MAXSIZE;
+        if (t > EMS_40_MAXSIZE)
+            t = EMS_40_MAXSIZE;
 
         /* Set up where EMS begins in local RAM, and how much we have. */
         dev->ems_start = ptr - dev->ram;
@@ -1333,6 +1363,72 @@ static const device_t brat_device = {
 };
 #endif
 
+static const device_config_t lotech_config[] = {
+// clang-format off
+    {
+        .name = "base",
+        .description = "Address",
+        .type = CONFIG_HEX16,
+        .default_string = "",
+        .default_int = 0x0260,
+        .file_filter = "",
+        .spinner = { 0 },
+        .selection = {
+            { .description = "260H", .value = 0x0260 },
+            { .description = "264H", .value = 0x0264 },
+            { .description = "268H", .value = 0x0268 },
+            { .description = "26CH", .value = 0x026C },
+            { .description = ""                      }
+        },
+    },
+    {
+        .name = "frame",
+        .description = "Frame Address",
+        .type = CONFIG_HEX20,
+        .default_string = "",
+        .default_int = 0xe0000,
+        .file_filter = "",
+        .spinner = { 0 },
+        .selection = {
+            { .description = "Disabled", .value = 0x00000 },
+            { .description = "C000H",    .value = 0xC0000 },
+            { .description = "D000H",    .value = 0xD0000 },
+            { .description = "E000H",    .value = 0xE0000 },
+            { .description = ""                           }
+        },
+    },
+    {
+        .name = "size",
+        .description = "Memory Size",
+        .type = CONFIG_SPINNER,
+        .default_string = "",
+        .default_int = 512,
+        .file_filter = "",
+        .spinner = {
+            .min = 512,
+            .max = 4096,
+            .step = 512
+        },
+        .selection = { { 0 } }
+    },
+    { .name = "", .description = "", .type = CONFIG_END }
+// clang-format on
+};
+
+static const device_t lotech_device = {
+    .name = "Lo-tech EMS Board",
+    .internal_name = "brat",
+    .flags = DEVICE_ISA,
+    .local = ISAMEM_LOTECH_CARD,
+    .init = isamem_init,
+    .close = isamem_close,
+    .reset = NULL,
+    { .available = NULL },
+    .speed_changed = NULL,
+    .force_redraw = NULL,
+    .config = lotech_config
+};
+
 #if defined(DEV_BRANCH) && defined(USE_ISAMEM_RAMPAGE)
 static const device_config_t rampage_config[] = {
   // clang-format off
@@ -1569,6 +1665,7 @@ static const struct {
 #if defined(DEV_BRANCH) && defined(USE_ISAMEM_IAB)
     { &iab_device          },
 #endif
+    { &lotech_device       },
     { NULL                 }
     // clang-format on
 };
