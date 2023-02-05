@@ -618,6 +618,7 @@ MCHOBJ := machine.o machine_table.o \
           m_at_slota.o \
           m_at_socket423.o \
           m_at_socket478.o \
+          m_at_lga775.o \
           m_at_misc.o
 
 KBCOBJ := kbc_at.o kbc_at_dev.o \

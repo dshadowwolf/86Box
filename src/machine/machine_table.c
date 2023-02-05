@@ -79,6 +79,7 @@ const machine_filter_t machine_types[] = {
     { "Slot A",                    MACHINE_TYPE_SLOTA      },
     { "Socket 423",                MACHINE_TYPE_SOCKET423  },
     { "Socket 478",                MACHINE_TYPE_SOCKET478  },
+    { "LGA 775",                   MACHINE_TYPE_LGA775     },
     { "Miscellaneous",             MACHINE_TYPE_MISC       }
 };
 
