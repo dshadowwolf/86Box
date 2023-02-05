@@ -77,6 +77,8 @@ const machine_filter_t machine_types[] = {
     { "Slot 2",                    MACHINE_TYPE_SLOT2      },
     { "Socket 370",                MACHINE_TYPE_SOCKET370  },
     { "Slot A",                    MACHINE_TYPE_SLOTA      },
+    { "Socket 423",                MACHINE_TYPE_SOCKET423  },
+    { "Socket 478",                MACHINE_TYPE_SOCKET478  },
     { "Miscellaneous",             MACHINE_TYPE_MISC       }
 };
 
@@ -13647,6 +13649,46 @@ const machine_t machines[] = {
         .kbc_device = NULL,
         .kbc_p1 = 0,
         .gpio = 0,
+        .device = NULL,
+        .fdc_device = NULL,
+        .sio_device = NULL,
+        .vid_device = NULL,
+        .snd_device = NULL,
+        .net_device = NULL
+    },
+    /* Socket 478 Motherboards */
+    {
+        .name = "[Intel i845] ASRock P4i45D+",
+        .internal_name = "p4i45d",
+        .type = MACHINE_TYPE_SOCKET478,
+        .chipset = MACHINE_CHIPSET_INTEL_I845,
+        .init = machine_at_p4i45d_init,
+        .p1_handler = NULL,
+        .gpio_handler = NULL,
+        .available_flag = MACHINE_AVAILABLE,
+        .gpio_acpi_handler = NULL,
+        .cpu = {
+            .package = CPU_PKG_SOCKET478,
+            .block = CPU_BLOCK_NONE,
+            .min_bus = 0,
+            .max_bus = 0,
+            .min_voltage = 0,
+            .max_voltage = 0,
+            .min_multi = 0,
+            .max_multi = 0
+        },
+        .bus_flags = MACHINE_PS2_NOISA,
+        .flags = MACHINE_IDE_DUAL,
+        .ram = {
+            .min = 32768,
+            .max = 2097152,
+            .step = 32768
+        },
+        .nvrmask = 255,
+        .kbc_device = NULL,
+        .kbc_p1 = 0xff,
+        .gpio = 0xffffffff,
+        .gpio_acpi = 0xffffffff,
         .device = NULL,
         .fdc_device = NULL,
         .sio_device = NULL,

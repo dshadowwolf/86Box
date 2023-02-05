@@ -184,9 +184,11 @@ enum {
     MACHINE_TYPE_SLOT1_370  = 20,
     MACHINE_TYPE_SLOT2      = 21,
     MACHINE_TYPE_SOCKET370  = 22,
-    MACHINE_TYPE_SLOTA      = 23,
-    MACHINE_TYPE_MISC       = 24,
-    MACHINE_TYPE_MAX        = 25
+    MACHINE_TYPE_SOCKET423  = 23,
+    MACHINE_TYPE_SOCKET478  = 24,
+    MACHINE_TYPE_SLOTA      = 25,
+    MACHINE_TYPE_MISC       = 26,
+    MACHINE_TYPE_MAX        = 27
 };
 
 enum {
@@ -778,6 +780,9 @@ extern int machine_at_j815epda_init(const machine_t *);
 extern int machine_at_m6tsl_init(const machine_t *);
 extern int machine_at_m6tss_init(const machine_t *);
 extern int machine_at_s2080_init(const machine_t *);
+
+/* m_at_socket478.c */
+extern int machine_at_p4i45d_init(const machine_t *);
 
 /* m_at_slota.c */
 extern int machine_at_k7m_init(const machine_t *);

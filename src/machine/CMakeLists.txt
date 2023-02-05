@@ -23,6 +23,7 @@ add_library(mch OBJECT machine.c machine_table.c m_xt.c m_xt_compaq.c
     m_at_socket4.c m_at_socket5.c m_at_socket7_3v.c m_at_socket7.c
     m_at_sockets7.c m_at_socket8.c m_at_slot1.c m_at_slot2.c m_at_socket370.c
     m_at_slota.c
+    m_at_socket478.c
     m_at_misc.c)
 
 if(AN430TX)
