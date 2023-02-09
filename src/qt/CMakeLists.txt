@@ -225,6 +225,13 @@ if(WIN32)
     target_sources(plat PRIVATE ../win/win_serial_passthrough.c)
 else()
     target_sources(plat PRIVATE ../unix/unix_serial_passthrough.c)
+    endif()
+
+    if(APPLE)
+    target_sources(plat PRIVATE ../mac/mac_cdrom_ioctl.c)
+else()
+    target_sources(plat PRIVATE ../unix/linux_cdrom_ioctl.c)
+#   target_sources(plat PRIVATE ../unix/dummy_cdrom_ioctl.c)
 endif()
 
 if (APPLE)

@@ -666,7 +666,7 @@ MINIVHDOBJ  := cwalk.o xml2_encoding.o convert.o \
                create.o minivhd_io.o manage.o struct_rw.o minivhd_util.o
 
 CDROMOBJ := cdrom.o \
-            cdrom_image_backend.o cdrom_image_viso.o cdrom_image.o cdrom_mitsumi.o
+            cdrom_image_backend.o cdrom_image_viso.o cdrom_image.o cdrom_mitsumi.o cdrom_null.c
 
 ZIPOBJ := zip.o
 
@@ -780,7 +780,7 @@ VOODOOOBJ := vid_voodoo.o vid_voodoo_banshee.o \
 PLATOBJ := win.o \
            win_dynld.o \
            win_cdrom.o win_keyboard.o \
-           win_mouse.o win_serial_passthrough.o
+           win_mouse.o win_serial_passthrough.o win_cdrom_ioctl.o
 
 UIOBJ := win_ui.o win_icon.o win_stbar.o discord.o \
          win_sdl.o win_opengl.o win_opengl_glslp.o glad.o \
