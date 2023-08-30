@@ -225,7 +225,7 @@ const machine_t machines[] = {
         .flags = MACHINE_FLAGS_NONE,
         .ram = {
             .min = 16,
-            .max = 64,
+            .max = 640,
             .step = 16
         },
         .nvrmask = 0,
@@ -264,7 +264,7 @@ const machine_t machines[] = {
         .flags = MACHINE_FLAGS_NONE,
         .ram = {
             .min = 64,
-            .max = 256,
+            .max = 640,
             .step = 64
         },
         .nvrmask = 0,
@@ -342,7 +342,7 @@ const machine_t machines[] = {
         .flags = MACHINE_FLAGS_NONE,
         .ram = {
             .min = 64,
-            .max = 256,
+            .max = 640,
             .step = 64
         },
         .nvrmask = 0,
@@ -537,7 +537,7 @@ const machine_t machines[] = {
         .flags = MACHINE_FLAGS_NONE,
         .ram = {
             .min = 128,
-            .max = 512,
+            .max = 640,
             .step = 64
         },
         .nvrmask = 0,
