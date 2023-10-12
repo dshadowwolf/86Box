@@ -76,10 +76,10 @@ const machine_filter_t machine_types[] = {
     { "Slot 1/Socket 370",         MACHINE_TYPE_SLOT1_370  },
     { "Slot 2",                    MACHINE_TYPE_SLOT2      },
     { "Socket 370",                MACHINE_TYPE_SOCKET370  },
-    { "Slot A",                    MACHINE_TYPE_SLOTA      },
     { "Socket 423",                MACHINE_TYPE_SOCKET423  },
     { "Socket 478",                MACHINE_TYPE_SOCKET478  },
     { "LGA 775",                   MACHINE_TYPE_LGA775     },
+    { "Slot A",                    MACHINE_TYPE_SLOTA      },
     { "Miscellaneous",             MACHINE_TYPE_MISC       }
 };
 
