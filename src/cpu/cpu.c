@@ -2784,24 +2784,6 @@ cpu_CPUID(void)
                 EAX = EBX = ECX = EDX = 0;
             break;
 
-        case CPU_PENTIUM3:
-            if (!EAX) {
-                EAX = 0x00000002;
-                EBX = 0x756e6547;
-                EDX = 0x49656e69;
-                ECX = 0x6c65746e;
-            } else if (EAX == 1) {
-                EAX = CPUID;
-                EBX = ECX = 0;
-                EDX       = CPUID_FPU | CPUID_VME | CPUID_PSE | CPUID_TSC | CPUID_MSR | CPUID_PAE | CPUID_MCE | CPUID_CMPXCHG8B | CPUID_MMX | CPUID_MTRR | CPUID_PGE | CPUID_MCA | CPUID_SEP | CPUID_FXSR | CPUID_CMOV | CPUID_SSE;
-            } else if (EAX == 2) {
-                EAX = 0x00000001;
-                EBX = ECX = 0;
-                EDX       = 0x00000000;
-            } else
-                EAX = EBX = ECX = EDX = 0;
-            break;
-
         case CPU_PENTIUM4:
         case CPU_PENTIUM4N:
             if (!EAX) {
@@ -3903,27 +3885,12 @@ cpu_WRMSR(void)
                 case 0x20d:
                 case 0x20e:
                 case 0x20f:
-/*
                     if (cpu_s->cpu_type != CPU_ATHLON)
                         goto amd_k_invalid_wrmsr;
-                    temp  = EAX | ((uint64_t) EDX << 32);
-                    temp2 = (ECX - 0x200) >> 1;
-                    if (ECX & 1) {
-                        cpu_log("MTRR physmask[%d] = %08llx\n", temp2, temp);
-
-                        if ((msr.mtrr_physmask[temp2] >> 11) & 0x1)
-                            mem_del_mtrr(msr.mtrr_physbase[temp2] & ~(0xFFF), msr.mtrr_physmask[temp2] & ~(0xFFF));
-
-                        if ((temp >> 11) & 0x1)
-                            mem_add_mtrr(msr.mtrr_physbase[temp2] & ~(0xFFF), temp & ~(0xFFF), msr.mtrr_physbase[temp2] & 0xFF);
-
-                        msr.mtrr_physmask[temp2] = temp;
-                    } else {
-                        cpu_log("MTRR physbase[%d] = %08llx\n", temp2, temp);
-
-                        msr.mtrr_physbase[temp2] = temp;
-                    }
-*/
+                    if (ECX & 1)
+                        msr.mtrr_physmask[(ECX - 0x200) >> 1] = EAX | ((uint64_t) EDX << 32);
+                    else
+                        msr.mtrr_physbase[(ECX - 0x200) >> 1] = EAX | ((uint64_t) EDX << 32);
                     break;
                 case 0x250:
                     if (cpu_s->cpu_type != CPU_ATHLON)
