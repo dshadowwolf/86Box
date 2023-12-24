@@ -2338,14 +2338,14 @@ begin:
                 ret = 2;
 
             alloc_length = 8;
-            b += 8;
+            b += 8;   // jump past header
 
             if ((feature == 0) || ((cdb[1] & 3) < 2)) {
                 b[2] = (0 << 2) | 0x02 | 0x01; /* persistent and current */
-                b[3] = 8;
+                b[3] = 0; // 8; // 8 bytes additional data but not actually accounted for ? Fixed to 0 -- DRH 23-DEV-2023 23:24 UTC-5
 
                 alloc_length += 4;
-                b += 4;
+                // b += 4; // ??? why are we jumping to the _next_ feature without putting in the first entry ? --  DRH 23-DEV-2023 23:25 UTC-5
 
                 for (uint8_t i = 0; i < 2; i++) {
                     b[0] = (profiles[i] >> 8) & 0xff;
@@ -2355,25 +2355,29 @@ begin:
                         b[2] |= 1;
 
                     alloc_length += 4;
-                    b += 4;
+                    b += 4; // jump to the space for the next entry
                 }
             }
+			// feature 1?			
             if ((feature == 1) || ((cdb[1] & 3) < 2)) {
-                b[1] = 1;
+                b[1] = 1; // Obsolete -- "Formerly Non-removable disk profile" in MMC-6
                 b[2] = (2 << 2) | 0x02 | 0x01; /* persistent and current */
                 b[3] = 8;
 
+				// encoding the bus type ?
                 if (dev->drv->bus_type == CDROM_BUS_SCSI)
                     b[7] = 1;
                 else
                     b[7] = 2;
                 b[8] = 1;
 
+				// this, at least, matches...
                 alloc_length += 12;
                 b += 12;
             }
+			// feature 2?
             if ((feature == 2) || ((cdb[1] & 3) < 2)) {
-                b[1] = 2;
+                b[1] = 2; // "Removable Disc" -- "Re-writable; with removable media"
                 b[2] = (1 << 2) | 0x02 | 0x01; /* persistent and current */
                 b[3] = 4;
 
@@ -2382,7 +2386,9 @@ begin:
                 alloc_length += 8;
                 b += 8;
             }
-
+			// 'feature == 1' and 'feature == 2' bits on optical devices?
+			// These don't seem to be for optical devices, but for things like the "Diablo"
+ 			// removable platter hard drive that some Alto's had.
             dev->buffer[0] = ((alloc_length - 4) >> 24) & 0xff;
             dev->buffer[1] = ((alloc_length - 4) >> 16) & 0xff;
             dev->buffer[2] = ((alloc_length - 4) >> 8) & 0xff;
